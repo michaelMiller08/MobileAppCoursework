@@ -3,18 +3,20 @@ package com.example.cafeapp.Activites.Landing
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.cafeapp.LoginActivity
 import com.example.cafeapp.LoginViewModel
+import com.example.cafeapp.Models.ProductModel
 import com.example.cafeapp.R
 import com.example.cafeapp.ViewModels.LandingViewModel
 import com.example.cafeapp.databinding.ActivityLandingBinding
 
-class LandingActivity : AppCompatActivity() {
+
+class LandingActivity : AppCompatActivity(), ProductOnClickListener {
     private lateinit var binding:  ActivityLandingBinding
     private lateinit var toggle:  ActionBarDrawerToggle
     private lateinit var viewModel: LandingViewModel
@@ -34,6 +36,18 @@ class LandingActivity : AppCompatActivity() {
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         )[LoginViewModel::class.java]
+
+
+
+        binding.recyclerView.apply{
+            layoutManager = GridLayoutManager(applicationContext , 3)
+            var x = viewModel.getProducts()?.toList();
+           adapter = x?.let { CardAdapter(it, this@LandingActivity) };
+        }
+
+
+
+
         binding.apply {
             toggle = ActionBarDrawerToggle(
                 this@LandingActivity,
@@ -65,18 +79,27 @@ class LandingActivity : AppCompatActivity() {
             }
 
 
+
         }
+
+
+
         toggle.syncState()
 
 
-        var cust = loginViewModel.getCurrentCustomer();
-        val textView: TextView = findViewById<TextView>(R.id.LandingText)
-        if (cust != null) {
-            textView.text = cust.username.toString()
-        };
-        else {
-            textView.text = "NULL"
-        }
+//        var cust = loginViewModel.getCurrentCustomer()
+//        val textView: TextView = findViewById<TextView>(R.id.LandingText)
+//        if (cust != null) {
+//            textView.text = cust.username.toString()
+//        } else {
+//            textView.text = "NULL"
+//        }
+    }
+
+    override fun onClick(productModel: ProductModel) {
+        val intent = Intent(applicationContext, ProductDetailActivity::class.java)
+        intent.putExtra("productExtra", productModel.id)
+        startActivity(intent)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -86,4 +109,6 @@ class LandingActivity : AppCompatActivity() {
             super.onOptionsItemSelected(item)
         }
     }
+
+
 }

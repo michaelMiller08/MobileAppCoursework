@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.cafeapp.Models.CustomerModel
+import com.example.cafeapp.Models.ProductModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -17,7 +18,7 @@ private val ver : Int = 1
 class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,null ,ver) {
 
 
-    //Customer table//z
+    //Customer table//
     private val customerTableName = "Customer"
     private val column_CustmerId = "CusId"
     private val column_CustomerFullName = "CusFullName"
@@ -28,19 +29,39 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
     private val column_CustomerIsActive = "CusIsActive"
     /*******************************/
 
+
+
+    //Product Table////
+    private val productTableName = "Product"
+    private val productColumnId = "ProdId"
+    private val column_productName = "ProdName"
+    private val column_productPrice = "ProdPrice"
+    private val column_productImage = "ProdImage"
+    private val column_productAvailable = "ProdAvailable"
+
+    /*************************/
+
     // This is called the first time a database is accessed
     // Create a new database
     override fun onCreate(db: SQLiteDatabase?) {
         try {
 
 
-            val sqlCreateStatement: String = "CREATE TABLE " + customerTableName + " ( " + column_CustmerId +
+            //Customer Table
+            val sqlCreateStatementCustomer: String = "CREATE TABLE " + customerTableName + " ( " + column_CustmerId +
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_CustomerFullName + " TEXT NOT NULL, " +
                     column_CustomerEmail + " TEXT NOT NULL, " + column_CustomerPhoneNo + " INTEGER NOT NULL, " +
                     column_CustomerUserName + " TEXT NOT NULL, " + column_CustomerPassword + " TEXT, " +
                     column_CustomerIsActive + " INTEGER NOT NULL)"
 
-            db?.execSQL(sqlCreateStatement)
+            //ProductTable
+            val sqlCreateStatementProduct: String = "CREATE TABLE " + productTableName + " ( " + productColumnId +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_productName + " TEXT NOT NULL, " +
+                    column_productPrice + " REAL NOT NULL, " + column_productImage + " BLOB NOT NULL, " +
+                    column_productAvailable + " INTEGER NOT NULL)"
+
+            db?.execSQL(sqlCreateStatementCustomer)
+            db?.execSQL(sqlCreateStatementProduct)
         }
         catch (e: SQLiteException) {}
     }
@@ -49,6 +70,10 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
     override fun onUpgrade(p0: SQLiteDatabase?, p1: Int, p2: Int) {
         TODO("Not yet implemented")
     }
+
+
+    //CUSTOMER//
+
 
     /**
      * return  1 : the new use has been add to the database successfully
@@ -221,6 +246,57 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
             null // Customer not found
         }
     }
+///////////************************//////////////
+
+    fun getAllProducts(): ArrayList<ProductModel> {
+        val db: SQLiteDatabase
+        try {
+            db = this.readableDatabase
+        } catch (e: SQLiteException) {
+            // Handle the exception or log an error
+            return ArrayList()
+        }
+
+        val productList = ArrayList<ProductModel>()
+        val sqlStatement = "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productAvailable FROM $productTableName"
+
+        val cursor: Cursor = db.rawQuery(sqlStatement, null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val idIndex = cursor.getColumnIndex(productColumnId)
+                val nameIndex = cursor.getColumnIndex(column_productName)
+                val priceIndex = cursor.getColumnIndex(column_productPrice)
+                val availableIndex = cursor.getColumnIndex(column_productAvailable)
+                val imageIndex = cursor.getColumnIndex(column_productImage)
+
+                // Check if column indices are valid
+                if (idIndex >= 0 && nameIndex >= 0 && priceIndex >= 0 && availableIndex >= 0) {
+                    val id: Int = cursor.getInt(idIndex)
+                    val name: String = cursor.getString(nameIndex)
+                    val price: Float = cursor.getFloat(priceIndex)
+                    val available: Boolean = cursor.getInt(availableIndex) == 1
+                    //Remember to add this back in
+//                    val image: ByteArray? = cursor.getBlob(imageIndex)
+
+                    val product = ProductModel(id, name, price, null, available) // Note: Set image to null as it is not loaded here
+                    productList.add(product)
+                } else {
+                    // Handle the case where one or more column indices are not found
+                    // Log an error or take appropriate action
+                }
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+
+        return productList
+    }
+
+
+
+
 
 
 }

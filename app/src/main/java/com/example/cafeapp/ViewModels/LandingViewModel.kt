@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.cafeapp.Helpers.DataBaseHelper
 import com.example.cafeapp.Helpers.UserManager
+import com.example.cafeapp.Models.ProductModel
 
 class LandingViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -11,7 +12,11 @@ class LandingViewModel(application: Application) : AndroidViewModel(application)
 
 
     fun logout() {
-        UserManager.clearLoggedInUser(getApplication());
+        UserManager.clearLoggedInUser(getApplication())
+    }
+
+    fun getProducts() : ArrayList<ProductModel> {
+        return db.getAllProducts()
     }
 
 }
