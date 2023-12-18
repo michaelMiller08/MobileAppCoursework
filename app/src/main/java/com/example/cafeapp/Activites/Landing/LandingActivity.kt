@@ -3,12 +3,12 @@ package com.example.cafeapp.Activites.Landing
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.cafeapp.Activites.Basket.BasketActivity
+import com.example.cafeapp.Activites.ManageProducts.ManageProductsActivity
 import com.example.cafeapp.Helpers.UserRole
 import com.example.cafeapp.LoginActivity
 import com.example.cafeapp.LoginViewModel
@@ -66,8 +66,8 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
             navView.setNavigationItemSelectedListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.adminOptions -> {
-                        Toast.makeText(this@LandingActivity, "first item clicked", Toast.LENGTH_SHORT).show()
-                    }
+                        val intent = Intent(this@LandingActivity, ManageProductsActivity::class.java)
+                        startActivity(intent)                       }
                     R.id.btnBasket -> {
                         val intent = Intent(this@LandingActivity, BasketActivity::class.java)
                         startActivity(intent)                    }

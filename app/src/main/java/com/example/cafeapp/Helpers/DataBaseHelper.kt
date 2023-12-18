@@ -328,6 +328,73 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
         return productList
     }
 
+    fun getProductById(productId: Int): ProductModel? {
+        val db: SQLiteDatabase
+        try {
+            db = this.readableDatabase
+        } catch (e: SQLiteException) {
+            return null
+        }
+
+        val sqlStatement =
+            "SELECT * FROM $productTableName WHERE $productColumnId = ?"
+        val param = arrayOf(productId.toString())
+        val cursor: Cursor = db.rawQuery(sqlStatement, param)
+
+        return if (cursor.moveToFirst()) {
+            val idIndex = cursor.getColumnIndex(productColumnId)
+            val nameIndex = cursor.getColumnIndex(column_productName)
+            val priceIndex = cursor.getColumnIndex(column_productPrice)
+            val availableIndex = cursor.getColumnIndex(column_productAvailable)
+            val imageIndex = cursor.getColumnIndex(column_productImage)
+
+            // Check if column indices are valid
+            if (idIndex >= 0 && nameIndex >= 0 && priceIndex >= 0 && availableIndex >= 0) {
+                val id: Int = cursor.getInt(idIndex)
+                val name: String = cursor.getString(nameIndex)
+                val price: Float = cursor.getFloat(priceIndex)
+                val available: Boolean = cursor.getInt(availableIndex) == 1
+                //Remember to add this back in
+                // val image: ByteArray? = cursor.getBlob(imageIndex)
+
+                val product = ProductModel(id, name, price, null, available) // Note: Set image to null as it is not loaded here
+                cursor.close()
+                db.close()
+                product
+            } else {
+                // Handle the case where one or more column indices are not found
+                // Log an error or take appropriate action
+                cursor.close()
+                db.close()
+                null
+            }
+        } else {
+            cursor.close()
+            db.close()
+            null // Product not found
+        }
+    }
+
+    fun editProduct(product: ProductModel) {
+        val db = writableDatabase
+        val cv = ContentValues()
+
+        // Update the relevant columns with the new values
+        cv.put(column_productName, product.name)
+        cv.put(column_productPrice, product.price)
+        cv.put(column_productImage, product.image) // Update this with the actual image data if needed
+        cv.put(column_productAvailable, if (product.available) 1 else 0)
+
+        // Define the WHERE clause to update the specific product based on its ID
+        val whereClause = "$productColumnId = ?"
+        val whereArgs = arrayOf(product.id.toString())
+
+        // Perform the update
+        db.update(productTableName, cv, whereClause, whereArgs)
+
+        db.close()
+    }
+
 
 
 //////////////////////////////
