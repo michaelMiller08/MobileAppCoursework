@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.example.cafeapp.Helpers.DataBaseHelper
 import com.example.cafeapp.Helpers.UserManager
+import com.example.cafeapp.Models.AdminModel
 import com.example.cafeapp.Models.CustomerModel
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
@@ -80,7 +81,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    fun createCustomer(
+    suspend fun createAdminAsync(
         fullName: String,
         email: String,
         phoneNo: String,
@@ -103,37 +104,19 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
 
         //**Database validation**//
-        val newCustomer = CustomerModel(-1, fullName, email, phoneNo, username, password, true)
+        val newAdmin = AdminModel(-1, fullName, email, phoneNo, username, password, true)
 
 
-        var returnResult = LoginErrorCodes.Error
-        val addCustomerResult: Int
-        try {
-            addCustomerResult = db.addCustomer(newCustomer)
+        return try {
+            when (db.addAdminAsync(newAdmin)) {
+                -1 -> LoginErrorCodes.Error
+                -2 -> LoginErrorCodes.DatabaseError
+                -3 -> LoginErrorCodes.UsernameAlreadyExists
+                else -> LoginErrorCodes.Success
+            }
         } catch (e: Exception) {
-            return LoginErrorCodes.Exception
+            LoginErrorCodes.Exception
         }
-        when (addCustomerResult) {
-            1 -> {
-                returnResult = LoginErrorCodes.Success
-
-            }
-
-            -1 -> {
-                returnResult = LoginErrorCodes.Error
-            }
-
-            -2 -> {
-                returnResult = LoginErrorCodes.DatabaseError
-            }
-
-            -3 -> {
-                returnResult = LoginErrorCodes.UsernameAlreadyExists
-            }
-
-        }
-
-        return returnResult
         //********//
 
     }

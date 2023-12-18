@@ -41,7 +41,6 @@
         android:textSize="12sp" />
     <Button
         android:layout_marginTop="10dp"
-
         android:layout_gravity="center"
         android:id="@+id/btnAddToBasket"
         android:layout_width="wrap_content"

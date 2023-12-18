@@ -13,6 +13,9 @@
         android:theme="@style/Theme.CafeApp"
         tools:targetApi="31">
         <activity
+            android:name=".Activites.Basket.BasketActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activites.Landing.ProductDetailActivity"
             android:exported="false" />
         <activity

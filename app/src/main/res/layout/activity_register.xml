@@ -67,6 +67,14 @@
             android:ems="10"
             android:inputType="textPassword"
             android:hint="Password" />
+        <EditText
+            android:id="@+id/editTextAdminCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPassword"
+            android:visibility="gone"
+            android:hint="Admin Code" />
 
         <Button
             android:id="@+id/btnRegister"

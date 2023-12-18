@@ -8,6 +8,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.cafeapp.Activites.Basket.BasketActivity
 import com.example.cafeapp.LoginActivity
 import com.example.cafeapp.LoginViewModel
 import com.example.cafeapp.Models.ProductModel
@@ -66,9 +67,9 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
                     R.id.firstItem -> {
                         Toast.makeText(this@LandingActivity, "first item clicked", Toast.LENGTH_SHORT).show()
                     }
-                    R.id.secondItem -> {
-                        Toast.makeText(this@LandingActivity, "second item clicked", Toast.LENGTH_SHORT).show()
-                    }
+                    R.id.btnBasket -> {
+                        val intent = Intent(this@LandingActivity, BasketActivity::class.java)
+                        startActivity(intent)                    }
                     R.id.btnLogout ->{
                         viewModel.logout()
                         val intent = Intent(this@LandingActivity, LoginActivity::class.java)

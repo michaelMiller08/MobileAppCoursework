@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
+import com.example.cafeapp.Models.AdminModel
 import com.example.cafeapp.Models.CustomerModel
 import com.example.cafeapp.Models.ProductModel
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +42,42 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
 
     /*************************/
 
+
+    //Admin table//
+    private val adminTableName = "Admin"
+    private val column_AdminId = "AdminId"
+    private val column_AdminFullName = "AdminFullName"
+    private val column_AdminEmail = "AdminEmail"
+    private val column_AdminPhoneNo = "AdminPhoneNo"
+    private val column_AdminUserName = "AdminUserName"
+    private val column_AdminPassword = "AdminPassword"
+    private val column_AdminIsActive = "AdminIsActive"
+    /*******************************/
+
+    //Order table//
+    private val orderTableName = "Order"
+    private val column_OrderId = "OrderId"
+    private val column_OrderCusId = "CusId"
+    private val column_OrderOrderDate = "OrderDate"
+    private val column_OrderOrderTime = "OrderTime"
+    private val column_OrderOrderStatus = "OrderStatus"
+    /*******************************/
+
+    //OrderDetails  table//
+    private val orderDetailsTableName = "OrderDetails"
+    private val column_orderDetailsOrderDetailsId = "OrderDetailsId"
+    private val column_orderDetailsProdId = "CusId"
+    /*******************************/
+
+    //Payment  table//
+    private val paymentTableName = "Payment"
+    private val column_PaymentPaymentId = "PaymentId"
+    private val column_PaymentOrderId = "OrderId"
+    private val column_PaymentPaymentType = "PaymentType"
+    private val column_PaymentPaymentAmount = "Amount"
+    private val column_PaymentPaymentDate = "PaymentDate"
+    /*******************************/
+
     // This is called the first time a database is accessed
     // Create a new database
     override fun onCreate(db: SQLiteDatabase?) {
@@ -60,8 +97,35 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
                     column_productPrice + " REAL NOT NULL, " + column_productImage + " BLOB NOT NULL, " +
                     column_productAvailable + " INTEGER NOT NULL)"
 
+            //AdminTable
+            val sqlCreateStatementAdmin: String = "CREATE TABLE " + adminTableName + " ( " + column_AdminId +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_AdminFullName + " TEXT NOT NULL, " +
+                    column_AdminEmail + " TEXT NOT NULL, " + column_AdminPhoneNo + " INTEGER NOT NULL, " +
+                    column_AdminUserName + " TEXT NOT NULL, " + column_AdminPassword + " TEXT, " +
+                    column_AdminIsActive + " INTEGER NOT NULL)"
+
+            //OrderTable
+            val sqlCreateStatementOrder: String = "CREATE TABLE " + orderTableName + " ( " + column_OrderId +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_OrderCusId + " INTEGER NOT NULL, " +
+                    column_OrderOrderDate + " TEXT NOT NULL, " + column_OrderOrderTime + " TEXT NOT NULL, " +
+                    column_OrderOrderStatus + " TEXT NOT NULL)"
+
+            //OrderTable
+            val sqlCreateStatementOrderDetails: String = "CREATE TABLE " + orderDetailsTableName + " ( " + column_orderDetailsOrderDetailsId +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_orderDetailsProdId + " INTEGER NOT NULL)"
+
+            //PaymentTable
+            val sqlCreateStatementPayment: String = "CREATE TABLE " + paymentTableName + " ( " + column_PaymentPaymentId +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_PaymentOrderId + " INTEGER NOT NULL, " +
+                    column_PaymentPaymentType + " TEXT NOT NULL, " + column_PaymentPaymentAmount + " INTEGER NOT NULL, " +
+                    column_PaymentPaymentDate + " TEXT NOT NULL )"
+
             db?.execSQL(sqlCreateStatementCustomer)
             db?.execSQL(sqlCreateStatementProduct)
+            db?.execSQL(sqlCreateStatementAdmin)
+            db?.execSQL(sqlCreateStatementOrder)
+            db?.execSQL(sqlCreateStatementPayment)
+            db?.execSQL(sqlCreateStatementOrderDetails)
         }
         catch (e: SQLiteException) {}
     }
@@ -108,36 +172,6 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
         }
     }
 
-    fun addCustomer(customer: CustomerModel) : Int {
-
-        val db: SQLiteDatabase
-        val isUserNameAlreadyExists = checkUserName(customer) // check if the username is already exist in the database
-        if(isUserNameAlreadyExists < 0)
-            return isUserNameAlreadyExists
-
-        try {
-            db = this.writableDatabase
-        }
-        catch(e: SQLiteException) {
-            return -2
-        }
-
-        val cv: ContentValues = ContentValues()
-
-        cv.put(column_CustomerFullName,customer.fullName)
-        cv.put(column_CustomerEmail, customer.email)
-        cv.put(column_CustomerPhoneNo, customer.phoneNo)
-        cv.put(column_CustomerUserName,customer.username.lowercase())
-        cv.put(column_CustomerPassword, customer.password)
-        cv.put(column_CustomerIsActive, customer.isActive)
-
-        val success  =  db.insert(customerTableName, null, cv)
-
-        db.close()
-        if (success.toInt() == -1) return success.toInt() //Error, adding new user
-        else return success.toInt() //1
-
-    }
 
     private fun checkUserName(customer: CustomerModel): Int {
 
@@ -296,6 +330,61 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
 
 
 
+//////////////////////////////
+suspend fun addAdminAsync(admin: AdminModel): Int {
+    return withContext(Dispatchers.IO) {
+        val checkAdminUsernameExists = checkAdminUsernameExists(admin)
+        if (checkAdminUsernameExists < 0)
+            return@withContext checkAdminUsernameExists
+
+        val db = writableDatabase
+        val cv = ContentValues()
+
+        cv.put(column_AdminFullName, admin.fullName)
+        cv.put(column_AdminEmail, admin.email)
+        cv.put(column_AdminPhoneNo, admin.phoneNo)
+        cv.put(column_AdminUserName, admin.username.lowercase())
+        cv.put(column_AdminPassword, admin.password)
+        cv.put(column_AdminIsActive, admin.isActive)
+
+        val success = db.insert(adminTableName, null, cv)
+
+        db.close()
+
+        if (success.toInt() == -1) success.toInt() else success.toInt()
+    }
+
+
+}
+    private fun checkAdminUsernameExists(admin: AdminModel): Int {
+
+        val db: SQLiteDatabase
+        try {
+            db = this.readableDatabase
+        }
+        catch(e: SQLiteException) {
+            return -2
+        }
+
+        val userName = admin.username.lowercase()
+
+        val sqlStatement = "SELECT * FROM $adminTableName WHERE $column_AdminUserName = ?"
+        val param = arrayOf(userName)
+        val cursor: Cursor =  db.rawQuery(sqlStatement,param)
+
+        if(cursor.moveToFirst()){
+            // The user is found
+            val n = cursor.getInt(0)
+            cursor.close()
+            db.close()
+            return -3 // error the user name is already exist
+        }
+
+        cursor.close()
+        db.close()
+        return 0 //User not found
+
+    }
 
 
 

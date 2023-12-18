@@ -5,8 +5,8 @@
     android:title="first item"
 />
 <item
-    android:id="@+id/secondItem"
-    android:title="2 item"
+    android:id="@+id/btnBasket"
+    android:title="Basket"
 />
 <item
     android:id="@+id/btnLogout"
