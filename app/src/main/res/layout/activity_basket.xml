@@ -17,6 +17,15 @@
         android:layout_width="match_parent"
        />
 
+        <TextView
+            android:id="@+id/totalPrice"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:text="Total: "/>
     <Button
         android:layout_gravity="center"
         android:layout_marginTop="10dp"

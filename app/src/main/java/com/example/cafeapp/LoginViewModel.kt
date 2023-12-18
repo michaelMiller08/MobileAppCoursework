@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.example.cafeapp.Helpers.DataBaseHelper
 import com.example.cafeapp.Helpers.UserManager
+import com.example.cafeapp.Helpers.UserRole
 import com.example.cafeapp.Models.AdminModel
 import com.example.cafeapp.Models.CustomerModel
 
@@ -17,6 +18,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     fun checkUserLoggedIn(): Boolean {
         return UserManager.getLoggedInUserId(getApplication()) != -1
+    }
+
+    fun getLoggedInUserRole() : UserRole{
+        return UserManager.getLoggedInUserRole(getApplication())
     }
 
 
@@ -32,7 +37,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             else -> {
-                UserManager.saveLoggedInUser(db.getCustomer(model), getApplication())
+                UserManager.saveLoggedInUser(db.getCustomer(model), UserRole.Customer, getApplication())
+
+                LoginErrorCodes.Success
+
+            }
+        }
+
+    }
+
+    fun adminLogin(username: String, password: String): LoginErrorCodes {
+        val model = AdminModel(0, "", "", "", username, password, true)
+        return when (db.getAdmin(model)) {
+            -1 -> {
+                LoginErrorCodes.Error
+            }
+
+            else -> {
+                UserManager.saveLoggedInUser(db.checkAdminUsernameExists(model), UserRole.Admin, getApplication())
 
                 LoginErrorCodes.Success
 

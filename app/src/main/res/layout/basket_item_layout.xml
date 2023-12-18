@@ -14,11 +14,17 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="product" />
+        <TextView
+        android:id="@+id/productPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="$.4" />
 
     <Button
         android:id="@+id/removeProduct"
         android:layout_height="wrap_content"
-        android:layout_width="2dp"
+        android:layout_width="wrap_content"
         android:layout_weight="0.5"
         android:text="Remove" />
 </LinearLayout>

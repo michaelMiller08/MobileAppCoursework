@@ -3,6 +3,7 @@ package com.example.cafeapp
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +18,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var password: EditText
     private lateinit var loginButton: Button
     private lateinit var registerButton: Button
-
+    private lateinit var isAdminCheckBox: CheckBox
 
 
 
@@ -30,11 +31,13 @@ class LoginActivity : AppCompatActivity() {
         password = findViewById(R.id.editTextPassword)
         loginButton = findViewById(R.id.btnLogin)
         registerButton = findViewById(R.id.btnRegister)
+        isAdminCheckBox = findViewById(R.id.checkBoxIsAdmin)
 
         loginButton.setOnClickListener { handleLoginButtonOnClick() }
         registerButton.setOnClickListener { handleRegisterButtonOnClick() }
 
         //If user has already signed in before, skip sign in
+        //do one to check if admin logged in
         if(viewModel.checkUserLoggedIn())
         {
             val intent = Intent(this, LandingActivity::class.java)
@@ -53,7 +56,13 @@ class LoginActivity : AppCompatActivity() {
                     return
                 }
             }
-            val loginAttempt = viewModel.login(username.text.toString(),password.text.toString())
+            var loginAttempt: LoginViewModel.LoginErrorCodes = LoginViewModel.LoginErrorCodes.Error
+            loginAttempt = if(isAdminCheckBox.isChecked) {
+                viewModel.adminLogin(username.text.toString(),password.text.toString())
+            } else {
+                viewModel.login(username.text.toString(),password.text.toString())
+
+            }
             if(loginAttempt == LoginViewModel.LoginErrorCodes.Success){
                 val intent = Intent(this, LandingActivity::class.java)
                 startActivity(intent)

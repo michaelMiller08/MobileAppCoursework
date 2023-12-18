@@ -28,6 +28,11 @@ class  BasketManager(context: Context) {
         saveBasketIds(existingIds)
     }
 
+    fun removeIdFromBasket(id: Int){
+        val existingIds = getBasketIds().toMutableList()
+        existingIds.remove(id)
+        saveBasketIds(existingIds)
+    }
 
     fun clearBasket(){
         prefs.edit().clear().apply()

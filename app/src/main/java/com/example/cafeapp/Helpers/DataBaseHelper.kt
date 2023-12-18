@@ -356,7 +356,7 @@ suspend fun addAdminAsync(admin: AdminModel): Int {
 
 
 }
-    private fun checkAdminUsernameExists(admin: AdminModel): Int {
+     fun checkAdminUsernameExists(admin: AdminModel): Int {
 
         val db: SQLiteDatabase
         try {
@@ -385,7 +385,35 @@ suspend fun addAdminAsync(admin: AdminModel): Int {
         return 0 //User not found
 
     }
+    fun getAdmin(admin: AdminModel) : Int {
 
+        val db: SQLiteDatabase
+        try {
+            db = this.readableDatabase
+        }
+        catch(e: SQLiteException) {
+            return -2
+        }
+
+        val userName = admin.username.lowercase()
+        val userPassword = admin.password
+
+        val sqlStatement = "SELECT * FROM $adminTableName WHERE $column_AdminUserName = ? AND $column_AdminPassword = ?"
+        val param = arrayOf(userName,userPassword)
+        val cursor: Cursor =  db.rawQuery(sqlStatement,param)
+        if(cursor.moveToFirst()){
+            // The customer is found
+            val n = cursor.getInt(0)
+            cursor.close()
+            db.close()
+            return n
+        }
+
+        cursor.close()
+        db.close()
+        return -1 //User not found
+
+    }
 
 
 }

@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.cafeapp.Activites.Basket.BasketActivity
+import com.example.cafeapp.Helpers.UserRole
 import com.example.cafeapp.LoginActivity
 import com.example.cafeapp.LoginViewModel
 import com.example.cafeapp.Models.ProductModel
@@ -64,7 +65,7 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
 
             navView.setNavigationItemSelectedListener { menuItem ->
                 when (menuItem.itemId) {
-                    R.id.firstItem -> {
+                    R.id.adminOptions -> {
                         Toast.makeText(this@LandingActivity, "first item clicked", Toast.LENGTH_SHORT).show()
                     }
                     R.id.btnBasket -> {
@@ -80,11 +81,10 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
             }
 
 
-
         }
 
 
-
+        applyAdminOptions()
         toggle.syncState()
 
 
@@ -96,7 +96,13 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
 //            textView.text = "NULL"
 //        }
     }
+private fun applyAdminOptions(){
+    val navMenu = binding.navView.menu
+    val adminOptionsItem = navMenu.findItem(R.id.adminOptions)// Hide the Admin Options item
 
+    // Show the Admin Options item
+    adminOptionsItem.isVisible = loginViewModel.getLoggedInUserRole() == UserRole.Admin
+}
     override fun onClick(productModel: ProductModel) {
         val intent = Intent(applicationContext, ProductDetailActivity::class.java)
         intent.putExtra("productExtra", productModel.id)
