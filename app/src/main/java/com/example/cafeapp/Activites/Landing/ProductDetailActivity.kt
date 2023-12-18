@@ -1,13 +1,11 @@
 package com.example.cafeapp.Activites.Landing
 
 import BasketViewModel
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.example.cafeapp.Activites.Basket.BasketActivity
 import com.example.cafeapp.ViewModels.LandingViewModel
 import com.example.cafeapp.databinding.ActivityProductDetailBinding
 import java.text.NumberFormat
@@ -51,8 +49,6 @@ private val basketViewModel: BasketViewModel by viewModels()
     private fun addToBasketOnClick(productId: Int) {
         basketViewModel.addToBasketById(productId)
         Toast.makeText(this, "Item added to basket successfully!", Toast.LENGTH_SHORT).show()
-        val intent = Intent(this, BasketActivity::class.java)
-        startActivity(intent)
     }
 
 }
