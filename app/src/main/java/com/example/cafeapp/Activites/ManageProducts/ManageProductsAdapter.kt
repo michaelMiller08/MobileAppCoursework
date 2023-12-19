@@ -13,7 +13,7 @@ import java.text.NumberFormat
 import java.util.Currency
 
 
-class ManageProductsAdapter(private var itemList: List<ProductModel>) :
+class ManageProductsAdapter(private var itemList: List<ProductModel>, private val clickListener: ReplaceImageClickListener) :
     RecyclerView.Adapter<ManageProductsAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -21,6 +21,7 @@ class ManageProductsAdapter(private var itemList: List<ProductModel>) :
         val itemName: TextView = itemView.findViewById(R.id.productName)
         val itemPrice: TextView = itemView.findViewById(R.id.productPrice)
         val removeProduct: Button = itemView.findViewById(R.id.removeProduct)
+        val replaceImage: Button = itemView.findViewById(R.id.replaceImage)
         val editProduct: Button = itemView.findViewById(R.id.editProduct)
         // Add more views as needed
     }
@@ -44,6 +45,11 @@ class ManageProductsAdapter(private var itemList: List<ProductModel>) :
         val currencyFormat = NumberFormat.getCurrencyInstance()
         currencyFormat.currency = Currency.getInstance("GBP")
         holder.itemPrice.text = currencyFormat.format(currentItem.price)
+
+        holder.replaceImage.setOnClickListener {
+            // Trigger the interface method when the image is clicked
+            clickListener.onReplaceImageClick(currentItem.id)
+        }
     }
     private fun handleEditProductOnClick(holder: ViewHolder) {
         val productId = itemList[holder.adapterPosition].id // Assuming there is an 'id' property in your ProductModel

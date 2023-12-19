@@ -406,15 +406,26 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
         //only showing 2 decimal places
         cv.put(column_productPrice,product.price.toDouble().toFloat()
         )
-        cv.put(
-            column_productImage,
-            ""
-        ) // Update this with the actual image data if needed
-        cv.put(column_productAvailable, if (product.available) 1 else 0)
+
 
         // Define the WHERE clause to update the specific product based on its ID
         val whereClause = "$productColumnId = ?"
         val whereArgs = arrayOf(product.id.toString())
+
+        // Perform the update
+        db.update(productTableName, cv, whereClause, whereArgs)
+
+        db.close()
+    }
+
+    fun editProductImageById(productId: Int, image: ByteArray) {
+        val db = writableDatabase
+        val cv = ContentValues()
+
+        cv.put(column_productImage, image)
+
+        val whereClause = "$productColumnId = ?"
+        val whereArgs = arrayOf(productId.toString())
 
         // Perform the update
         db.update(productTableName, cv, whereClause, whereArgs)
