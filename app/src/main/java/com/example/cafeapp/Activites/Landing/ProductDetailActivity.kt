@@ -1,6 +1,8 @@
 package com.example.cafeapp.Activites.Landing
 
 import BasketViewModel
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -8,8 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.cafeapp.ViewModels.LandingViewModel
 import com.example.cafeapp.databinding.ActivityProductDetailBinding
-import java.text.NumberFormat
-import java.util.Currency
 
 class ProductDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProductDetailBinding
@@ -38,10 +38,13 @@ private val basketViewModel: BasketViewModel by viewModels()
         val productID = intent.getIntExtra("productExtra", -1)
         val product = basketViewModel.productFromID(productID)
         if (product != null) {
+
+            val bmp: Bitmap =
+                BitmapFactory.decodeByteArray(product.image, 0, product.image!!.size)
+            binding.productImg.setImageBitmap(bmp)
             binding.productTitle.text = product.name
-            val currencyFormat = NumberFormat.getCurrencyInstance()
-            currencyFormat.currency = Currency.getInstance("GBP")
-            binding.productPrice.text = currencyFormat.format(product.price)
+            binding.productPrice.text = ("£${product.price}")
+
             binding.btnAddToBasket.setOnClickListener { addToBasketOnClick(productID) }
         }
     }

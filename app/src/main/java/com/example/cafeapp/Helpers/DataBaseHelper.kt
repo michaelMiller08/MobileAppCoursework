@@ -291,6 +291,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
     }
 ///////////************************//////////////
 
+    // Modify the getAllProducts function to handle image data
     fun getAllProducts(): ArrayList<ProductModel> {
         val db: SQLiteDatabase
         try {
@@ -302,7 +303,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
 
         val productList = ArrayList<ProductModel>()
         val sqlStatement =
-            "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productAvailable FROM $productTableName"
+            "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productImage, $column_productAvailable FROM $productTableName"
 
         val cursor: Cursor = db.rawQuery(sqlStatement, null)
 
@@ -315,21 +316,20 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
                 val imageIndex = cursor.getColumnIndex(column_productImage)
 
                 // Check if column indices are valid
-                if (idIndex >= 0 && nameIndex >= 0 && priceIndex >= 0 && availableIndex >= 0) {
+                if (idIndex >= 0 && nameIndex >= 0 && priceIndex >= 0 && availableIndex >= 0 && imageIndex >= 0) {
                     val id: Int = cursor.getInt(idIndex)
                     val name: String = cursor.getString(nameIndex)
                     val price: Float = cursor.getFloat(priceIndex)
                     val available: Boolean = cursor.getInt(availableIndex) == 1
-                    //Remember to add this back in
-//                    val image: ByteArray? = cursor.getBlob(imageIndex)
+                    val image: ByteArray? = cursor.getBlob(imageIndex)
 
                     val product = ProductModel(
                         id,
                         name,
                         price,
-                        null,
+                        image,
                         available
-                    ) // Note: Set image to null as it is not loaded here
+                    )
                     productList.add(product)
                 } else {
                     // Handle the case where one or more column indices are not found
@@ -352,7 +352,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
             return null
         }
         val sqlStatement =
-            "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productAvailable FROM $productTableName WHERE $productColumnId = ?"
+            "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productImage $column_productAvailable FROM $productTableName WHERE $productColumnId = ?"
 
         val param = arrayOf(productId.toString())
         val cursor: Cursor = db.rawQuery(sqlStatement, param)
@@ -362,7 +362,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
             val nameIndex = cursor.getColumnIndex(column_productName)
             val priceIndex = cursor.getColumnIndex(column_productPrice)
             val availableIndex = cursor.getColumnIndex(column_productAvailable)
-            // val imageIndex = cursor.getColumnIndex(column_productImage)
+             val imageIndex = cursor.getColumnIndex(column_productImage)
 
             // Check if column indices are valid
             if (idIndex >= 0 && nameIndex >= 0 && priceIndex >= 0 && availableIndex >= 0) {
@@ -371,13 +371,13 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
                 val price: Float = cursor.getFloat(priceIndex)
                 val available: Boolean = cursor.getInt(availableIndex) == 1
                 //Remember to add this back in
-                // val image: ByteArray? = cursor.getBlob(imageIndex)
+                 val image: ByteArray? = cursor.getBlob(imageIndex)
 
                 val product = ProductModel(
                     id,
                     name,
                     price,
-                    null,
+                    image,
                     available
                 ) // Note: Set image to null as it is not loaded here
                 cursor.close()
@@ -403,7 +403,9 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
 
         // Update the relevant columns with the new values
         cv.put(column_productName, product.name)
-        cv.put(column_productPrice, product.price)
+        //only showing 2 decimal places
+        cv.put(column_productPrice,product.price.toDouble().toFloat()
+        )
         cv.put(
             column_productImage,
             ""
