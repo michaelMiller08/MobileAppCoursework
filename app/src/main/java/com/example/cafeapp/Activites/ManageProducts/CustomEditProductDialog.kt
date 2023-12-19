@@ -8,6 +8,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.cafeapp.R
 import com.example.cafeapp.ViewModels.ManageProductsViewModel
+
 class CustomEditProductDialog(private val productId: Int) : DialogFragment() {
 
     private lateinit var viewModel: ManageProductsViewModel
@@ -23,7 +24,8 @@ class CustomEditProductDialog(private val productId: Int) : DialogFragment() {
             )[ManageProductsViewModel::class.java]
 
             // Inflate the custom layout
-            val view = requireActivity().layoutInflater.inflate(R.layout.custom_edit_product_dialog, null)
+            val view =
+                requireActivity().layoutInflater.inflate(R.layout.custom_edit_product_dialog, null)
 
             // Find the EditText views within the layout
             editTextProductTitle = view.findViewById(R.id.editTextTitle)
@@ -33,7 +35,9 @@ class CustomEditProductDialog(private val productId: Int) : DialogFragment() {
                 .setView(view)
                 .setPositiveButton("Save") { dialog, id ->
                     // Call the saveUpdates function here
-                    saveUpdates()
+                    if(saveUpdates()){
+
+                    }
                 }
                 .setNegativeButton("Cancel") { dialog, id ->
                     getDialog()?.cancel()
@@ -43,10 +47,21 @@ class CustomEditProductDialog(private val productId: Int) : DialogFragment() {
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
-    private fun saveUpdates() {
-        // Access editTextProductTitle and editTextProductPrice here
-        viewModel
-       viewModel.updateProduct()
-        // Do something with title and price
+    private fun saveUpdates(): Boolean {
+        val priceText = editTextProductPrice.text.toString().trim()
+
+        val price = if (priceText.isNotEmpty()) {
+            try {
+                priceText.toFloat()
+            } catch (e: NumberFormatException) {
+                // Handle the case where the input is not a valid float
+                // You might want to show an error message to the user
+                return false
+            }
+        } else {
+            0.0f
+        }
+
+        return viewModel.updateProduct(productId, editTextProductTitle.text.toString().trim(), price)
     }
 }

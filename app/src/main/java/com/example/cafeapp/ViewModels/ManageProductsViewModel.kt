@@ -5,10 +5,10 @@ import androidx.lifecycle.AndroidViewModel
 import com.example.cafeapp.Helpers.DataBaseHelper
 import com.example.cafeapp.Models.ProductModel
 
-class ManageProductsViewModel (application: Application) : AndroidViewModel(application) {
+class ManageProductsViewModel(application: Application) : AndroidViewModel(application) {
     private val db: DataBaseHelper = DataBaseHelper(application.applicationContext)
 
-    fun getProducts() : List<ProductModel>{
+    fun getProducts(): List<ProductModel> {
         return db.getAllProducts()
     }
 
@@ -20,14 +20,37 @@ class ManageProductsViewModel (application: Application) : AndroidViewModel(appl
     //Returns a boolean if failed returns false
     fun updateProduct(id: Int, name: String, price: Float): Boolean {
         val product = db.getProductById(id)
+        var newName = name
+        var newPrice = price
+        if (name == "") {
+            if (product != null) {
+                newName = product.name
 
-        if (product != null) {
-            product.name = name
-            product.price = price
-            db.editProduct(product)
-            return true
+            }
+        }
+
+        if (price == 0F) {
+            if (product != null) {
+                newPrice = product.price
+            }
+        }
+
+
+        val newProduct = product?.let {
+            ProductModel(
+                it.id,
+                newName,
+                newPrice,
+                product.image,
+                product.available
+            )
+        }
+
+        return if (newProduct != null) {
+            db.editProduct(newProduct)
+            true
         } else {
-            return false
+            false
         }
     }
 }

@@ -14,9 +14,9 @@ import kotlinx.coroutines.withContext
 
 /* Database Config*/
 private val DataBaseName = "Database.db"
-private val ver : Int = 1
+private val ver: Int = 1
 
-class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,null ,ver) {
+class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName, null, ver) {
 
 
     //Customer table//
@@ -28,8 +28,8 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
     private val column_CustomerUserName = "CusUserName"
     private val column_CustomerPassword = "CusPassword"
     private val column_CustomerIsActive = "CusIsActive"
-    /*******************************/
 
+    /*******************************/
 
 
     //Product Table////
@@ -52,6 +52,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
     private val column_AdminUserName = "AdminUserName"
     private val column_AdminPassword = "AdminPassword"
     private val column_AdminIsActive = "AdminIsActive"
+
     /*******************************/
 
     //Order table//
@@ -61,12 +62,14 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
     private val column_OrderOrderDate = "OrderDate"
     private val column_OrderOrderTime = "OrderTime"
     private val column_OrderOrderStatus = "OrderStatus"
+
     /*******************************/
 
     //OrderDetails  table//
     private val orderDetailsTableName = "OrderDetails"
     private val column_orderDetailsOrderDetailsId = "OrderDetailsId"
     private val column_orderDetailsProdId = "CusId"
+
     /*******************************/
 
     //Payment  table//
@@ -76,6 +79,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
     private val column_PaymentPaymentType = "PaymentType"
     private val column_PaymentPaymentAmount = "Amount"
     private val column_PaymentPaymentDate = "PaymentDate"
+
     /*******************************/
 
     // This is called the first time a database is accessed
@@ -85,40 +89,46 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
 
 
             //Customer Table
-            val sqlCreateStatementCustomer: String = "CREATE TABLE " + customerTableName + " ( " + column_CustmerId +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_CustomerFullName + " TEXT NOT NULL, " +
-                    column_CustomerEmail + " TEXT NOT NULL, " + column_CustomerPhoneNo + " INTEGER NOT NULL, " +
-                    column_CustomerUserName + " TEXT NOT NULL, " + column_CustomerPassword + " TEXT, " +
-                    column_CustomerIsActive + " INTEGER NOT NULL)"
+            val sqlCreateStatementCustomer: String =
+                "CREATE TABLE " + customerTableName + " ( " + column_CustmerId +
+                        " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_CustomerFullName + " TEXT NOT NULL, " +
+                        column_CustomerEmail + " TEXT NOT NULL, " + column_CustomerPhoneNo + " INTEGER NOT NULL, " +
+                        column_CustomerUserName + " TEXT NOT NULL, " + column_CustomerPassword + " TEXT, " +
+                        column_CustomerIsActive + " INTEGER NOT NULL)"
 
             //ProductTable
-            val sqlCreateStatementProduct: String = "CREATE TABLE " + productTableName + " ( " + productColumnId +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_productName + " TEXT NOT NULL, " +
-                    column_productPrice + " REAL NOT NULL, " + column_productImage + " BLOB NOT NULL, " +
-                    column_productAvailable + " INTEGER NOT NULL)"
+            val sqlCreateStatementProduct: String =
+                "CREATE TABLE " + productTableName + " ( " + productColumnId +
+                        " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_productName + " TEXT NOT NULL, " +
+                        column_productPrice + " REAL NOT NULL, " + column_productImage + " BLOB NOT NULL, " +
+                        column_productAvailable + " INTEGER NOT NULL)"
 
             //AdminTable
-            val sqlCreateStatementAdmin: String = "CREATE TABLE " + adminTableName + " ( " + column_AdminId +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_AdminFullName + " TEXT NOT NULL, " +
-                    column_AdminEmail + " TEXT NOT NULL, " + column_AdminPhoneNo + " INTEGER NOT NULL, " +
-                    column_AdminUserName + " TEXT NOT NULL, " + column_AdminPassword + " TEXT, " +
-                    column_AdminIsActive + " INTEGER NOT NULL)"
+            val sqlCreateStatementAdmin: String =
+                "CREATE TABLE " + adminTableName + " ( " + column_AdminId +
+                        " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_AdminFullName + " TEXT NOT NULL, " +
+                        column_AdminEmail + " TEXT NOT NULL, " + column_AdminPhoneNo + " INTEGER NOT NULL, " +
+                        column_AdminUserName + " TEXT NOT NULL, " + column_AdminPassword + " TEXT, " +
+                        column_AdminIsActive + " INTEGER NOT NULL)"
 
             //OrderTable
-            val sqlCreateStatementOrder: String = "CREATE TABLE " + orderTableName + " ( " + column_OrderId +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_OrderCusId + " INTEGER NOT NULL, " +
-                    column_OrderOrderDate + " TEXT NOT NULL, " + column_OrderOrderTime + " TEXT NOT NULL, " +
-                    column_OrderOrderStatus + " TEXT NOT NULL)"
+            val sqlCreateStatementOrder: String =
+                "CREATE TABLE " + orderTableName + " ( " + column_OrderId +
+                        " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_OrderCusId + " INTEGER NOT NULL, " +
+                        column_OrderOrderDate + " TEXT NOT NULL, " + column_OrderOrderTime + " TEXT NOT NULL, " +
+                        column_OrderOrderStatus + " TEXT NOT NULL)"
 
             //OrderTable
-            val sqlCreateStatementOrderDetails: String = "CREATE TABLE " + orderDetailsTableName + " ( " + column_orderDetailsOrderDetailsId +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_orderDetailsProdId + " INTEGER NOT NULL)"
+            val sqlCreateStatementOrderDetails: String =
+                "CREATE TABLE " + orderDetailsTableName + " ( " + column_orderDetailsOrderDetailsId +
+                        " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_orderDetailsProdId + " INTEGER NOT NULL)"
 
             //PaymentTable
-            val sqlCreateStatementPayment: String = "CREATE TABLE " + paymentTableName + " ( " + column_PaymentPaymentId +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_PaymentOrderId + " INTEGER NOT NULL, " +
-                    column_PaymentPaymentType + " TEXT NOT NULL, " + column_PaymentPaymentAmount + " INTEGER NOT NULL, " +
-                    column_PaymentPaymentDate + " TEXT NOT NULL )"
+            val sqlCreateStatementPayment: String =
+                "CREATE TABLE " + paymentTableName + " ( " + column_PaymentPaymentId +
+                        " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_PaymentOrderId + " INTEGER NOT NULL, " +
+                        column_PaymentPaymentType + " TEXT NOT NULL, " + column_PaymentPaymentAmount + " INTEGER NOT NULL, " +
+                        column_PaymentPaymentDate + " TEXT NOT NULL )"
 
             db?.execSQL(sqlCreateStatementCustomer)
             db?.execSQL(sqlCreateStatementProduct)
@@ -126,8 +136,8 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
             db?.execSQL(sqlCreateStatementOrder)
             db?.execSQL(sqlCreateStatementPayment)
             db?.execSQL(sqlCreateStatementOrderDetails)
+        } catch (e: SQLiteException) {
         }
-        catch (e: SQLiteException) {}
     }
 
     // This is called if the database ver. is changed
@@ -178,8 +188,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
         val db: SQLiteDatabase
         try {
             db = this.readableDatabase
-        }
-        catch(e: SQLiteException) {
+        } catch (e: SQLiteException) {
             return -2
         }
 
@@ -187,9 +196,9 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
 
         val sqlStatement = "SELECT * FROM $customerTableName WHERE $column_CustomerUserName = ?"
         val param = arrayOf(userName)
-        val cursor: Cursor =  db.rawQuery(sqlStatement,param)
+        val cursor: Cursor = db.rawQuery(sqlStatement, param)
 
-        if(cursor.moveToFirst()){
+        if (cursor.moveToFirst()) {
             // The user is found
             val n = cursor.getInt(0)
             cursor.close()
@@ -203,13 +212,12 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
 
     }
 
-    fun getCustomer(customer: CustomerModel) : Int {
+    fun getCustomer(customer: CustomerModel): Int {
 
         val db: SQLiteDatabase
         try {
             db = this.readableDatabase
-        }
-        catch(e: SQLiteException) {
+        } catch (e: SQLiteException) {
             return -2
         }
 
@@ -217,10 +225,11 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
         val userPassword = customer.password
         //val sqlStatement = "SELECT * FROM $TableName WHERE $Column_UserName = $userName AND $Column_Password = $userPassword"
 
-        val sqlStatement = "SELECT * FROM $customerTableName WHERE $column_CustomerUserName = ? AND $column_CustomerPassword = ?"
-        val param = arrayOf(userName,userPassword)
-        val cursor: Cursor =  db.rawQuery(sqlStatement,param)
-        if(cursor.moveToFirst()){
+        val sqlStatement =
+            "SELECT * FROM $customerTableName WHERE $column_CustomerUserName = ? AND $column_CustomerPassword = ?"
+        val param = arrayOf(userName, userPassword)
+        val cursor: Cursor = db.rawQuery(sqlStatement, param)
+        if (cursor.moveToFirst()) {
             // The customer is found
             val n = cursor.getInt(0)
             cursor.close()
@@ -292,7 +301,8 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
         }
 
         val productList = ArrayList<ProductModel>()
-        val sqlStatement = "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productAvailable FROM $productTableName"
+        val sqlStatement =
+            "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productAvailable FROM $productTableName"
 
         val cursor: Cursor = db.rawQuery(sqlStatement, null)
 
@@ -313,7 +323,13 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
                     //Remember to add this back in
 //                    val image: ByteArray? = cursor.getBlob(imageIndex)
 
-                    val product = ProductModel(id, name, price, null, available) // Note: Set image to null as it is not loaded here
+                    val product = ProductModel(
+                        id,
+                        name,
+                        price,
+                        null,
+                        available
+                    ) // Note: Set image to null as it is not loaded here
                     productList.add(product)
                 } else {
                     // Handle the case where one or more column indices are not found
@@ -335,9 +351,9 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
         } catch (e: SQLiteException) {
             return null
         }
-
         val sqlStatement =
-            "SELECT * FROM $productTableName WHERE $productColumnId = ?"
+            "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productAvailable FROM $productTableName WHERE $productColumnId = ?"
+
         val param = arrayOf(productId.toString())
         val cursor: Cursor = db.rawQuery(sqlStatement, param)
 
@@ -346,7 +362,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
             val nameIndex = cursor.getColumnIndex(column_productName)
             val priceIndex = cursor.getColumnIndex(column_productPrice)
             val availableIndex = cursor.getColumnIndex(column_productAvailable)
-            val imageIndex = cursor.getColumnIndex(column_productImage)
+            // val imageIndex = cursor.getColumnIndex(column_productImage)
 
             // Check if column indices are valid
             if (idIndex >= 0 && nameIndex >= 0 && priceIndex >= 0 && availableIndex >= 0) {
@@ -357,7 +373,13 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
                 //Remember to add this back in
                 // val image: ByteArray? = cursor.getBlob(imageIndex)
 
-                val product = ProductModel(id, name, price, null, available) // Note: Set image to null as it is not loaded here
+                val product = ProductModel(
+                    id,
+                    name,
+                    price,
+                    null,
+                    available
+                ) // Note: Set image to null as it is not loaded here
                 cursor.close()
                 db.close()
                 product
@@ -382,7 +404,10 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
         // Update the relevant columns with the new values
         cv.put(column_productName, product.name)
         cv.put(column_productPrice, product.price)
-        cv.put(column_productImage, product.image) // Update this with the actual image data if needed
+        cv.put(
+            column_productImage,
+            ""
+        ) // Update this with the actual image data if needed
         cv.put(column_productAvailable, if (product.available) 1 else 0)
 
         // Define the WHERE clause to update the specific product based on its ID
@@ -396,40 +421,39 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context,DataBaseName,n
     }
 
 
+    //////////////////////////////
+    suspend fun addAdminAsync(admin: AdminModel): Int {
+        return withContext(Dispatchers.IO) {
+            val checkAdminUsernameExists = checkAdminUsernameExists(admin)
+            if (checkAdminUsernameExists < 0)
+                return@withContext checkAdminUsernameExists
 
-//////////////////////////////
-suspend fun addAdminAsync(admin: AdminModel): Int {
-    return withContext(Dispatchers.IO) {
-        val checkAdminUsernameExists = checkAdminUsernameExists(admin)
-        if (checkAdminUsernameExists < 0)
-            return@withContext checkAdminUsernameExists
+            val db = writableDatabase
+            val cv = ContentValues()
 
-        val db = writableDatabase
-        val cv = ContentValues()
+            cv.put(column_AdminFullName, admin.fullName)
+            cv.put(column_AdminEmail, admin.email)
+            cv.put(column_AdminPhoneNo, admin.phoneNo)
+            cv.put(column_AdminUserName, admin.username.lowercase())
+            cv.put(column_AdminPassword, admin.password)
+            cv.put(column_AdminIsActive, admin.isActive)
 
-        cv.put(column_AdminFullName, admin.fullName)
-        cv.put(column_AdminEmail, admin.email)
-        cv.put(column_AdminPhoneNo, admin.phoneNo)
-        cv.put(column_AdminUserName, admin.username.lowercase())
-        cv.put(column_AdminPassword, admin.password)
-        cv.put(column_AdminIsActive, admin.isActive)
+            val success = db.insert(adminTableName, null, cv)
 
-        val success = db.insert(adminTableName, null, cv)
+            db.close()
 
-        db.close()
+            if (success.toInt() == -1) success.toInt() else success.toInt()
+        }
 
-        if (success.toInt() == -1) success.toInt() else success.toInt()
+
     }
 
-
-}
-     fun checkAdminUsernameExists(admin: AdminModel): Int {
+    fun checkAdminUsernameExists(admin: AdminModel): Int {
 
         val db: SQLiteDatabase
         try {
             db = this.readableDatabase
-        }
-        catch(e: SQLiteException) {
+        } catch (e: SQLiteException) {
             return -2
         }
 
@@ -437,9 +461,9 @@ suspend fun addAdminAsync(admin: AdminModel): Int {
 
         val sqlStatement = "SELECT * FROM $adminTableName WHERE $column_AdminUserName = ?"
         val param = arrayOf(userName)
-        val cursor: Cursor =  db.rawQuery(sqlStatement,param)
+        val cursor: Cursor = db.rawQuery(sqlStatement, param)
 
-        if(cursor.moveToFirst()){
+        if (cursor.moveToFirst()) {
             // The user is found
             val n = cursor.getInt(0)
             cursor.close()
@@ -452,23 +476,24 @@ suspend fun addAdminAsync(admin: AdminModel): Int {
         return 0 //User not found
 
     }
-    fun getAdmin(admin: AdminModel) : Int {
+
+    fun getAdmin(admin: AdminModel): Int {
 
         val db: SQLiteDatabase
         try {
             db = this.readableDatabase
-        }
-        catch(e: SQLiteException) {
+        } catch (e: SQLiteException) {
             return -2
         }
 
         val userName = admin.username.lowercase()
         val userPassword = admin.password
 
-        val sqlStatement = "SELECT * FROM $adminTableName WHERE $column_AdminUserName = ? AND $column_AdminPassword = ?"
-        val param = arrayOf(userName,userPassword)
-        val cursor: Cursor =  db.rawQuery(sqlStatement,param)
-        if(cursor.moveToFirst()){
+        val sqlStatement =
+            "SELECT * FROM $adminTableName WHERE $column_AdminUserName = ? AND $column_AdminPassword = ?"
+        val param = arrayOf(userName, userPassword)
+        val cursor: Cursor = db.rawQuery(sqlStatement, param)
+        if (cursor.moveToFirst()) {
             // The customer is found
             val n = cursor.getInt(0)
             cursor.close()
