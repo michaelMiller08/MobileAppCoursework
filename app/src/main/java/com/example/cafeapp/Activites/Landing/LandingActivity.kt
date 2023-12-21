@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.cafeapp.Activites.Basket.BasketActivity
 import com.example.cafeapp.Activites.ManageProducts.ManageProductsActivity
+import com.example.cafeapp.AddProducts.AddProductsActivity
 import com.example.cafeapp.Helpers.UserRole
 import com.example.cafeapp.LoginActivity
 import com.example.cafeapp.LoginViewModel
@@ -19,8 +20,8 @@ import com.example.cafeapp.databinding.ActivityLandingBinding
 
 
 class LandingActivity : AppCompatActivity(), ProductOnClickListener {
-    private lateinit var binding:  ActivityLandingBinding
-    private lateinit var toggle:  ActionBarDrawerToggle
+    private lateinit var binding: ActivityLandingBinding
+    private lateinit var toggle: ActionBarDrawerToggle
     private lateinit var viewModel: LandingViewModel
     private lateinit var loginViewModel: LoginViewModel
 
@@ -41,10 +42,10 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
 
 
 
-        binding.recyclerView.apply{
-            layoutManager = GridLayoutManager(applicationContext , 3)
+        binding.recyclerView.apply {
+            layoutManager = GridLayoutManager(applicationContext, 3)
             var x = viewModel.getProducts()?.toList();
-           adapter = x?.let { CardAdapter(it, this@LandingActivity) };
+            adapter = x?.let { CardAdapter(it, this@LandingActivity) };
         }
 
 
@@ -65,13 +66,25 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
 
             navView.setNavigationItemSelectedListener { menuItem ->
                 when (menuItem.itemId) {
+
+                    R.id.addProducts -> {
+                        val intent =
+                            Intent(this@LandingActivity, AddProductsActivity::class.java)
+                        startActivity(intent)
+                    }
+
                     R.id.adminOptions -> {
-                        val intent = Intent(this@LandingActivity, ManageProductsActivity::class.java)
-                        startActivity(intent)                       }
+                        val intent =
+                            Intent(this@LandingActivity, ManageProductsActivity::class.java)
+                        startActivity(intent)
+                    }
+
                     R.id.btnBasket -> {
                         val intent = Intent(this@LandingActivity, BasketActivity::class.java)
-                        startActivity(intent)                    }
-                    R.id.btnLogout ->{
+                        startActivity(intent)
+                    }
+
+                    R.id.btnLogout -> {
                         viewModel.logout()
                         val intent = Intent(this@LandingActivity, LoginActivity::class.java)
                         startActivity(intent)
@@ -88,21 +101,19 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
         toggle.syncState()
 
 
-//        var cust = loginViewModel.getCurrentCustomer()
-//        val textView: TextView = findViewById<TextView>(R.id.LandingText)
-//        if (cust != null) {
-//            textView.text = cust.username.toString()
-//        } else {
-//            textView.text = "NULL"
-//        }
     }
-private fun applyAdminOptions(){
-    val navMenu = binding.navView.menu
-    val adminOptionsItem = navMenu.findItem(R.id.adminOptions)// Hide the Admin Options item
 
-    // Show the Admin Options item
-    adminOptionsItem.isVisible = loginViewModel.getLoggedInUserRole() == UserRole.Admin
-}
+    private fun applyAdminOptions() {
+        val navMenu = binding.navView.menu
+        val adminOptionsItem = navMenu.findItem(R.id.adminOptions)// Hide the Admin Options item
+        val addProducts = navMenu.findItem(R.id.addProducts)
+
+        // Show the Admin Options item
+        adminOptionsItem.isVisible = loginViewModel.getLoggedInUserRole() == UserRole.Admin
+        addProducts.isVisible = loginViewModel.getLoggedInUserRole() == UserRole.Admin
+
+    }
+
     override fun onClick(productModel: ProductModel) {
         val intent = Intent(applicationContext, ProductDetailActivity::class.java)
         intent.putExtra("productExtra", productModel.id)

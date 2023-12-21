@@ -41,7 +41,7 @@ class ManageProductsViewModel(application: Application) : AndroidViewModel(appli
                 it.id,
                 newName,
                 newPrice,
-                product.image,
+                null,
                 product.available
             )
         }

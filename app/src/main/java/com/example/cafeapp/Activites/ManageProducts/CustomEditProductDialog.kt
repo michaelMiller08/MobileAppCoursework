@@ -55,8 +55,11 @@ class CustomEditProductDialog(private val productId: Int) : DialogFragment() {
             try {
                 priceText.toFloat()
             } catch (e: NumberFormatException) {
-                // Handle the case where the input is not a valid float
-                // You might want to show an error message to the user
+                 Toast.makeText(
+                    requireContext(),
+                    "Invalid Number!",
+                    Toast.LENGTH_LONG
+                ).show()
                 return false
             }
         } else {

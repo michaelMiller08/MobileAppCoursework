@@ -1,22 +1,31 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="10dp"
+    android:layout_marginTop="10dp"
     android:layout_marginEnd="10dp"
     android:orientation="vertical">
 
+    <!-- Product Details -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
+        <!-- ImageView for the Product Image -->
+        <ImageView
+            android:id="@+id/productImage"
+            android:layout_width="100dp"
+            android:layout_height="200dp"
+            android:src="@drawable/placeholderimg" />
 
+        <!-- Product Details: Title, Name, and Price -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:layout_marginStart="10dp">
 
             <TextView
                 android:id="@+id/productNameTitle"
@@ -33,7 +42,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-
                 android:gravity="center"
                 android:text="Sample Name"
                 android:textSize="20sp" />
@@ -43,8 +51,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-
                 android:gravity="center"
+                android:layout_marginTop="20dp"
                 android:text="Product Price: "
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -53,50 +61,48 @@
                 android:id="@+id/productPrice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="$4.5"
                 android:textSize="20sp" />
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center">
-
-            <Button
-                android:id="@+id/editProduct"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="5dp"
-                android:layout_weight="0.5"
-                android:text="Edit Info" />
-
-            <Button
-                android:id="@+id/replaceImage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="5dp"
-                android:layout_weight="0.5"
-                android:text="Replace Image" />
-
-            <Button
-                android:id="@+id/removeProduct"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="5dp"
-                android:layout_weight="0.5"
-
-                android:text="Remove" />
-        </LinearLayout>
-
-
     </LinearLayout>
 
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+
+        <Button
+            android:id="@+id/editProduct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:layout_weight="0.5"
+            android:text="Edit Info" />
+
+        <Button
+            android:id="@+id/replaceImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:layout_weight="0.5"
+            android:text="Replace Image" />
+
+        <Button
+            android:id="@+id/removeProduct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:layout_weight="0.5"
+            android:text="Remove" />
+    </LinearLayout>
+
+    <!-- Divider Line -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="2dp"

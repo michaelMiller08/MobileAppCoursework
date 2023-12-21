@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.cafeapp.Activites.ManageProducts.CustomCheckoutDialog
 import com.example.cafeapp.R
 
 class BasketActivity : AppCompatActivity() {
@@ -36,6 +37,7 @@ class BasketActivity : AppCompatActivity() {
         checkout = findViewById(R.id.btnCheckout)
 
         clearBasket.setOnClickListener { clearBasket() }
+        checkout.setOnClickListener { handleCheckoutOnClick() }
 
         // Observe changes in the basket LiveData
         basketViewModel.basket.observe(this) { newBasket ->
@@ -54,6 +56,16 @@ class BasketActivity : AppCompatActivity() {
         basketViewModel.totalPrice.observe(this, Observer { total ->
             val formattedTotal = String.format("£%.2f", total)
             totalPrice.text = "Total Price: $formattedTotal"
+        })
+    }
+
+    private fun handleCheckoutOnClick() {
+        val fragmentManager = this@BasketActivity.supportFragmentManager
+
+        basketViewModel.totalPrice.observe(this@BasketActivity, Observer { totalPrice ->
+            // Now totalPrice is the Float value inside LiveData
+            val dialog = CustomCheckoutDialog(totalPrice)
+            dialog.show(fragmentManager, "checkoutDialog")
         })
     }
 

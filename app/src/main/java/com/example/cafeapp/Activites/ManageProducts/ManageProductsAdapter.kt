@@ -1,9 +1,12 @@
 package com.example.cafeapp.Activites.ManageProducts
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -17,13 +20,12 @@ class ManageProductsAdapter(private var itemList: List<ProductModel>, private va
     RecyclerView.Adapter<ManageProductsAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // Define views in the item layout
+        val itemImage: ImageView = itemView.findViewById(R.id.productImage)
         val itemName: TextView = itemView.findViewById(R.id.productName)
         val itemPrice: TextView = itemView.findViewById(R.id.productPrice)
         val removeProduct: Button = itemView.findViewById(R.id.removeProduct)
         val replaceImage: Button = itemView.findViewById(R.id.replaceImage)
         val editProduct: Button = itemView.findViewById(R.id.editProduct)
-        // Add more views as needed
     }
 
 
@@ -36,10 +38,12 @@ class ManageProductsAdapter(private var itemList: List<ProductModel>, private va
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        // Bind data to the views
         val currentItem = itemList[position]
+        val bmp: Bitmap =
+            BitmapFactory.decodeByteArray(currentItem.image, 0, currentItem.image!!.size)
+        holder.itemImage.setImageBitmap(bmp)
         holder.itemName.text = currentItem.name
-        holder.removeProduct.setOnClickListener {}
+        holder.removeProduct.setOnClickListener {handleRemoveProductOnClick(currentItem.id)}
         holder.editProduct.setOnClickListener {handleEditProductOnClick(holder)
         }
         val currencyFormat = NumberFormat.getCurrencyInstance()
@@ -51,8 +55,12 @@ class ManageProductsAdapter(private var itemList: List<ProductModel>, private va
             clickListener.onReplaceImageClick(currentItem.id)
         }
     }
+
+    private fun handleRemoveProductOnClick(id: Int){
+        //ToDo: Needs implementing
+    }
     private fun handleEditProductOnClick(holder: ViewHolder) {
-        val productId = itemList[holder.adapterPosition].id // Assuming there is an 'id' property in your ProductModel
+        val productId = itemList[holder.adapterPosition].id
         val fragmentManager = holder.itemView.context as AppCompatActivity
         val dialog = CustomEditProductDialog(productId)
         dialog.show(fragmentManager.supportFragmentManager, "editProductDialog")

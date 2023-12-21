@@ -8,15 +8,21 @@ import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.cafeapp.Models.AdminModel
 import com.example.cafeapp.Models.CustomerModel
+import com.example.cafeapp.Models.OrderDetailsModel
+import com.example.cafeapp.Models.OrderModel
+import com.example.cafeapp.Models.PaymentModel
 import com.example.cafeapp.Models.ProductModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.format.DateTimeFormatter
 
 /* Database Config*/
 private val DataBaseName = "Database.db"
 private val ver: Int = 1
 
 class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName, null, ver) {
+
+    private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 
     //Customer table//
@@ -68,7 +74,8 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
     //OrderDetails  table//
     private val orderDetailsTableName = "OrderDetails"
     private val column_orderDetailsOrderDetailsId = "OrderDetailsId"
-    private val column_orderDetailsProdId = "CusId"
+    private val column_orderDetailsOrderId = "OrderId"
+    private val column_orderDetailsProdId = "ProdId"
 
     /*******************************/
 
@@ -118,16 +125,16 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
                         column_OrderOrderDate + " TEXT NOT NULL, " + column_OrderOrderTime + " TEXT NOT NULL, " +
                         column_OrderOrderStatus + " TEXT NOT NULL)"
 
-            //OrderTable
+            //OrderDetailsTable
             val sqlCreateStatementOrderDetails: String =
                 "CREATE TABLE " + orderDetailsTableName + " ( " + column_orderDetailsOrderDetailsId +
-                        " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_orderDetailsProdId + " INTEGER NOT NULL)"
+                        " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_orderDetailsOrderId + " INTEGER NOT NULL," + column_orderDetailsProdId + " INTEGER NOT NULL)"
 
             //PaymentTable
             val sqlCreateStatementPayment: String =
                 "CREATE TABLE " + paymentTableName + " ( " + column_PaymentPaymentId +
                         " INTEGER PRIMARY KEY AUTOINCREMENT, " + column_PaymentOrderId + " INTEGER NOT NULL, " +
-                        column_PaymentPaymentType + " TEXT NOT NULL, " + column_PaymentPaymentAmount + " INTEGER NOT NULL, " +
+                        column_PaymentPaymentType + " TEXT NOT NULL, " + column_PaymentPaymentAmount + " REAL NOT NULL, " +
                         column_PaymentPaymentDate + " TEXT NOT NULL )"
 
             db?.execSQL(sqlCreateStatementCustomer)
@@ -352,7 +359,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
             return null
         }
         val sqlStatement =
-            "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productImage $column_productAvailable FROM $productTableName WHERE $productColumnId = ?"
+            "SELECT $productColumnId, $column_productName, $column_productPrice, $column_productImage, $column_productAvailable FROM $productTableName WHERE $productColumnId = ?"
 
         val param = arrayOf(productId.toString())
         val cursor: Cursor = db.rawQuery(sqlStatement, param)
@@ -370,7 +377,6 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
                 val name: String = cursor.getString(nameIndex)
                 val price: Float = cursor.getFloat(priceIndex)
                 val available: Boolean = cursor.getInt(availableIndex) == 1
-                //Remember to add this back in
                  val image: ByteArray? = cursor.getBlob(imageIndex)
 
                 val product = ProductModel(
@@ -379,13 +385,11 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
                     price,
                     image,
                     available
-                ) // Note: Set image to null as it is not loaded here
+                )
                 cursor.close()
                 db.close()
                 product
             } else {
-                // Handle the case where one or more column indices are not found
-                // Log an error or take appropriate action
                 cursor.close()
                 db.close()
                 null
@@ -518,6 +522,71 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
         db.close()
         return -1 //User not found
 
+    }
+
+    suspend fun addProductAsync(product: ProductModel) {
+        return withContext(Dispatchers.IO) {
+            val db = writableDatabase
+            val cv = ContentValues()
+            cv.put(column_productName, product.name)
+            cv.put(column_productPrice, product.price)
+            cv.put(column_productImage, product.image)
+            cv.put(column_productAvailable, product.available)
+
+            val success = db.insert(productTableName, null, cv)
+            db.close()
+        }
+
+    }
+
+    // Order table
+    suspend fun addOrderAsync( order: OrderModel) {
+        return withContext(Dispatchers.IO) {
+            val db = writableDatabase
+            val cv = ContentValues()
+            cv.put(column_OrderCusId, order.customerId)
+            cv.put(column_OrderOrderDate, order.orderDate)
+            cv.put(column_OrderOrderTime, order.orderTime)
+            cv.put(column_OrderOrderStatus, order.orderStatus)
+
+            val success = db.insert(orderTableName, null, cv)
+            db.close()
+        }
+
+    }
+
+    // Payment table
+    suspend fun addPaymentAsync( paymentModel: PaymentModel) {
+        return withContext(Dispatchers.IO) {
+            val db = writableDatabase
+            val cv = ContentValues()
+
+            cv.put(column_PaymentOrderId, paymentModel.orderId)
+            cv.put(column_PaymentPaymentType, paymentModel.paymentType)
+            cv.put(column_PaymentPaymentAmount, paymentModel.paymentAmount)
+            cv.put(column_PaymentPaymentDate, paymentModel.paymentDate)
+
+            val success = db.insert(paymentTableName, null, cv)
+            db.close()
+
+            success
+        }
+    }
+
+    // OrderDetails table
+    suspend fun addOrderDetailsAsync(orderDetailsModel: OrderDetailsModel): Long {
+        return withContext(Dispatchers.IO) {
+            val db = writableDatabase
+            val cv = ContentValues()
+
+            cv.put(column_orderDetailsOrderId, orderDetailsModel.orderId)
+            cv.put(column_orderDetailsProdId, orderDetailsModel.productId)
+
+            val success = db.insert(orderDetailsTableName, null, cv)
+            db.close()
+
+            success
+        }
     }
 
 

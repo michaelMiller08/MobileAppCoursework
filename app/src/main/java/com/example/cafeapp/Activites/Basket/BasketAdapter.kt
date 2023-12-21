@@ -20,6 +20,8 @@ class BasketAdapter(private var itemList: List<ProductModel>, private val basket
         val itemName: TextView = itemView.findViewById(R.id.productName)
         val itemPrice: TextView = itemView.findViewById(R.id.productPrice)
         val removeProduct: Button = itemView.findViewById(R.id.removeProduct)
+
+
         // Add more views as needed
     }
 
@@ -44,7 +46,10 @@ class BasketAdapter(private var itemList: List<ProductModel>, private val basket
         val currencyFormat = NumberFormat.getCurrencyInstance()
         currencyFormat.currency = Currency.getInstance("GBP")
         holder.itemPrice.text = currencyFormat.format(currentItem.price)
+
     }
+
+
 
     override fun getItemCount(): Int {
         // Return the number of items in the list

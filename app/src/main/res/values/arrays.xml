@@ -1,0 +1,8 @@
+<resources>
+    <array name="payment_types_array">
+        <item>Credit Card</item>
+        <item>Debit Card</item>
+        <item>PayPal</item>
+        <item>Cash</item>
+    </array>
+</resources>
