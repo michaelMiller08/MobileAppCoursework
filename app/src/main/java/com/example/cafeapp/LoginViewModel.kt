@@ -13,7 +13,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     val customerListLive = MutableLiveData<List<CustomerModel>>()
     private val passwordLengthValidation: Int = 6
-    private val db: DataBaseHelper = DataBaseHelper(application.applicationContext)
+    internal var db: DataBaseHelper = DataBaseHelper(application.applicationContext)
 
 
     fun checkUserLoggedIn(): Boolean {
@@ -24,10 +24,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         return UserManager.getLoggedInUserRole(getApplication())
     }
 
-
-    fun getCurrentCustomer(): CustomerModel? {
-        return db.getCustomerById(UserManager.getLoggedInUserId(getApplication()))
-    }
 
     fun login(username: String, password: String): LoginErrorCodes {
         val model = CustomerModel(0, "", "", "", username, password, true)

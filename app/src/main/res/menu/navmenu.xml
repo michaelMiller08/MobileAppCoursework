@@ -9,6 +9,13 @@
         android:title="Add Products"
         android:visible="false" />
     <item
+        android:id="@+id/manageOrders"
+        android:title="Manage Orders"
+        android:visible="false" />
+    <item
+        android:id="@+id/viewOrders"
+        android:title="View Orders" />
+    <item
         android:id="@+id/btnBasket"
         android:title="Basket" />
     <item

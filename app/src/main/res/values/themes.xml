@@ -1,13 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.CafeApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+         <item name="colorPrimary">#9575cd</item>
+        <item name="android:windowBackground">#f8bbd0</item>
+
     </style>
 
     <style name="Theme.CafeApp" parent="Base.Theme.CafeApp" />
 
-    <style name="Theme.CafeApp.ActionBar" parent="Theme.AppCompat.Light.DarkActionBar" />
+    <style name="Theme.CafeApp.ActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">#9575cd</item>
+        <item name="android:windowBackground">#f8bbd0</item>
+    </style>
 
     <style name="Theme.CafeApp.NoActionBar">
         <item name="windowActionBar">false</item>

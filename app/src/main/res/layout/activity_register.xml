@@ -27,7 +27,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-
+        <ImageView
+            android:layout_width="500px"
+            android:layout_height="500px"
+            android:layout_marginBottom="20dp"
+            android:src="@drawable/loginimg"/>
         <EditText
             android:id="@+id/editTextFullName"
             android:layout_width="match_parent"

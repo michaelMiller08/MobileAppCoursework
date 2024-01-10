@@ -57,7 +57,7 @@ class ManageProductsViewModel(application: Application) : AndroidViewModel(appli
     fun replaceProductImage(productId: Int, img: ByteArray) : Boolean{
         return try{
             db.editProductImageById(productId, img)
-            true;
+            true
         } catch(e: Exception) {
             false
         }

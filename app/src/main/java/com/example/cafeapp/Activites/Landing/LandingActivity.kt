@@ -8,7 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.cafeapp.Activites.Basket.BasketActivity
+import com.example.cafeapp.Activites.ManageOrders.ManageOrdersActivity
 import com.example.cafeapp.Activites.ManageProducts.ManageProductsActivity
+import com.example.cafeapp.Activites.ViewOrders.ViewOrdersActivity
 import com.example.cafeapp.AddProducts.AddProductsActivity
 import com.example.cafeapp.Helpers.UserRole
 import com.example.cafeapp.LoginActivity
@@ -44,8 +46,8 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
 
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(applicationContext, 3)
-            var x = viewModel.getProducts()?.toList();
-            adapter = x?.let { CardAdapter(it, this@LandingActivity) };
+            var x = viewModel.getProducts().toList()
+            adapter = x?.let { CardAdapter(it, this@LandingActivity) }
         }
 
 
@@ -84,6 +86,16 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
                         startActivity(intent)
                     }
 
+                    R.id.manageOrders -> {
+                        val intent = Intent(this@LandingActivity, ManageOrdersActivity::class.java)
+                        startActivity(intent)
+                    }
+
+                    R.id.viewOrders -> {
+                        val intent = Intent(this@LandingActivity, ViewOrdersActivity::class.java)
+                        startActivity(intent)
+                    }
+
                     R.id.btnLogout -> {
                         viewModel.logout()
                         val intent = Intent(this@LandingActivity, LoginActivity::class.java)
@@ -105,12 +117,17 @@ class LandingActivity : AppCompatActivity(), ProductOnClickListener {
 
     private fun applyAdminOptions() {
         val navMenu = binding.navView.menu
-        val adminOptionsItem = navMenu.findItem(R.id.adminOptions)// Hide the Admin Options item
-        val addProducts = navMenu.findItem(R.id.addProducts)
 
-        // Show the Admin Options item
-        adminOptionsItem.isVisible = loginViewModel.getLoggedInUserRole() == UserRole.Admin
-        addProducts.isVisible = loginViewModel.getLoggedInUserRole() == UserRole.Admin
+        val adminMenuItems = listOf(R.id.adminOptions, R.id.addProducts, R.id.manageOrders)
+
+        adminMenuItems.forEach { menuItemId ->
+            val menuItem = navMenu.findItem(menuItemId)
+            menuItem.isVisible = loginViewModel.getLoggedInUserRole() == UserRole.Admin
+        }
+
+        if (loginViewModel.getLoggedInUserRole() == UserRole.Admin) navMenu.findItem(R.id.viewOrders).isVisible =
+            false
+
 
     }
 

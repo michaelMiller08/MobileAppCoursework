@@ -69,7 +69,7 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            var result: LoginViewModel.LoginErrorCodes;
+            var result: LoginViewModel.LoginErrorCodes
             if (adminCode.text.toString() == adminSecretCode) {
                 result = viewModel.createAdminAsync(
                     fullName.text.toString(),

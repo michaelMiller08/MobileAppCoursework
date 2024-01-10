@@ -1,7 +1,6 @@
 package com.example.cafeapp.Activites.Basket
 
 import BasketViewModel
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -20,35 +19,29 @@ class BasketActivity : AppCompatActivity() {
     private lateinit var clearBasket: Button
     private lateinit var checkout: Button
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_basket)
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
 
-
         val basketAdapter = BasketAdapter(basketViewModel.getItemsInBasket(), basketViewModel)
         recyclerView.adapter = basketAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        totalPrice = findViewById(R.id.totalPrice);
+        totalPrice = findViewById(R.id.totalPrice)
         clearBasket = findViewById(R.id.btnClearBasket)
         checkout = findViewById(R.id.btnCheckout)
-
-        clearBasket.setOnClickListener { clearBasket() }
-        checkout.setOnClickListener { handleCheckoutOnClick() }
 
         // Observe changes in the basket LiveData
         basketViewModel.basket.observe(this) { newBasket ->
             // Update the adapter with the new dataset
             basketAdapter.updateDataSet(newBasket)
 
-            if (newBasket.count() <= 1){
+            if (newBasket.count() <= 1) {
                 clearBasket.visibility = View.GONE
                 checkout.visibility = View.GONE
-            }
-            else{
+            } else {
                 clearBasket.visibility = View.VISIBLE
                 checkout.visibility = View.VISIBLE
             }
@@ -57,6 +50,18 @@ class BasketActivity : AppCompatActivity() {
             val formattedTotal = String.format("£%.2f", total)
             totalPrice.text = "Total Price: $formattedTotal"
         })
+
+        // Check the initial state of the basket
+        if (basketViewModel.getItemsInBasket().isEmpty()) {
+            clearBasket.visibility = View.GONE
+            checkout.visibility = View.GONE
+        } else {
+            clearBasket.visibility = View.VISIBLE
+            checkout.visibility = View.VISIBLE
+        }
+
+        clearBasket.setOnClickListener { clearBasket() }
+        checkout.setOnClickListener { handleCheckoutOnClick() }
     }
 
     private fun handleCheckoutOnClick() {
@@ -64,7 +69,8 @@ class BasketActivity : AppCompatActivity() {
 
         basketViewModel.totalPrice.observe(this@BasketActivity, Observer { totalPrice ->
             // Now totalPrice is the Float value inside LiveData
-            val dialog = CustomCheckoutDialog(totalPrice)
+            //pass the products to the checkout dialog
+            val dialog = CustomCheckoutDialog(totalPrice, basketViewModel.basket.value.orEmpty())
             dialog.show(fragmentManager, "checkoutDialog")
         })
     }

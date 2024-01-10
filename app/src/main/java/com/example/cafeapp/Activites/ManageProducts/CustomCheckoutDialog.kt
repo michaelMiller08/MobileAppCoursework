@@ -10,12 +10,14 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.cafeapp.Helpers.UserRole
+import com.example.cafeapp.Models.ProductModel
 import com.example.cafeapp.R
 import com.example.cafeapp.ViewModels.CheckoutViewModel
 import com.example.cafeapp.ViewModels.ManageProductsViewModel
 
 
-class CustomCheckoutDialog(totalPrice: Float) : DialogFragment() {
+class CustomCheckoutDialog(totalPrice: Float,     private val products: List<ProductModel>
+) : DialogFragment() {
 
     private lateinit var viewModel: ManageProductsViewModel
     private lateinit var checkoutViewModel: CheckoutViewModel
@@ -89,7 +91,8 @@ class CustomCheckoutDialog(totalPrice: Float) : DialogFragment() {
 
 
     private fun createOrder(paymentType: String, paymentAmount: Float) {
-        checkoutViewModel.createOrder(paymentType, paymentAmount)
+
+        checkoutViewModel.createOrder(paymentType, paymentAmount, this.products)
     }
 
     private fun getSelectedPaymentType(): String {

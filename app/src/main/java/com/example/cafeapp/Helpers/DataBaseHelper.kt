@@ -3,6 +3,7 @@ package com.example.cafeapp.Helpers
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
@@ -14,13 +15,15 @@ import com.example.cafeapp.Models.PaymentModel
 import com.example.cafeapp.Models.ProductModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.mindrot.jbcrypt.BCrypt
 import java.time.format.DateTimeFormatter
 
 /* Database Config*/
-private val DataBaseName = "Database.db"
-private val ver: Int = 1
+private const val DataBaseName = "Database.db"
+private const val ver: Int = 1
 
-class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName, null, ver) {
+class DataBaseHelper(context: Context) : IDataBaseHelper,
+    SQLiteOpenHelper(context, DataBaseName, null, ver) {
 
     private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
@@ -62,7 +65,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
     /*******************************/
 
     //Order table//
-    private val orderTableName = "Order"
+    private val orderTableName = "`Order`"
     private val column_OrderId = "OrderId"
     private val column_OrderCusId = "CusId"
     private val column_OrderOrderDate = "OrderDate"
@@ -165,7 +168,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
      */
 
 
-    suspend fun addCustomerAsync(customer: CustomerModel): Int {
+    override suspend fun addCustomerAsync(customer: CustomerModel): Int {
         return withContext(Dispatchers.IO) {
             val isUserNameAlreadyExists = checkUserName(customer)
             if (isUserNameAlreadyExists < 0)
@@ -178,7 +181,11 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
             cv.put(column_CustomerEmail, customer.email)
             cv.put(column_CustomerPhoneNo, customer.phoneNo)
             cv.put(column_CustomerUserName, customer.username.lowercase())
-            cv.put(column_CustomerPassword, customer.password)
+
+            // Hash the password using bcrypt
+            val hashedPassword = BCrypt.hashpw(customer.password, BCrypt.gensalt())
+            cv.put(column_CustomerPassword, hashedPassword)
+
             cv.put(column_CustomerIsActive, customer.isActive)
 
             val success = db.insert(customerTableName, null, cv)
@@ -190,7 +197,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
     }
 
 
-    private fun checkUserName(customer: CustomerModel): Int {
+    override fun checkUserName(customer: CustomerModel): Int {
 
         val db: SQLiteDatabase
         try {
@@ -219,8 +226,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
 
     }
 
-    fun getCustomer(customer: CustomerModel): Int {
-
+    override fun getCustomer(customer: CustomerModel): Int {
         val db: SQLiteDatabase
         try {
             db = this.readableDatabase
@@ -229,77 +235,50 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
         }
 
         val userName = customer.username.lowercase()
-        val userPassword = customer.password
-        //val sqlStatement = "SELECT * FROM $TableName WHERE $Column_UserName = $userName AND $Column_Password = $userPassword"
 
-        val sqlStatement =
-            "SELECT * FROM $customerTableName WHERE $column_CustomerUserName = ? AND $column_CustomerPassword = ?"
-        val param = arrayOf(userName, userPassword)
-        val cursor: Cursor = db.rawQuery(sqlStatement, param)
-        if (cursor.moveToFirst()) {
-            // The customer is found
-            val n = cursor.getInt(0)
-            cursor.close()
-            db.close()
-            return n
-        }
-
-        cursor.close()
-        db.close()
-        return -1 //User not found
-
-    }
-
-    fun getCustomerById(customerId: Int): CustomerModel? {
-        val db: SQLiteDatabase
-        try {
-            db = this.readableDatabase
-        } catch (e: SQLiteException) {
-            return null
-        }
-
-        val sqlStatement = "SELECT * FROM $customerTableName WHERE $column_CustmerId = ?"
-        val param = arrayOf(customerId.toString())
+        val sqlStatement = "SELECT * FROM $customerTableName WHERE $column_CustomerUserName = ?"
+        val param = arrayOf(userName)
         val cursor: Cursor = db.rawQuery(sqlStatement, param)
 
         return if (cursor.moveToFirst()) {
-            val customerIdIndex = cursor.getColumnIndex(column_CustmerId)
-            val customerFullNameIndex = cursor.getColumnIndex(column_CustomerFullName)
-            val customerEmailIndex = cursor.getColumnIndex(column_CustomerEmail)
-            val customerPhoneNoIndex = cursor.getColumnIndex(column_CustomerPhoneNo)
-            val customerUserNameIndex = cursor.getColumnIndex(column_CustomerUserName)
-            val customerPasswordIndex = cursor.getColumnIndex(column_CustomerPassword)
-            val customerIsActiveIndex = cursor.getColumnIndex(column_CustomerIsActive)
+            // The user is found, now check the password
+            val passwordColumnIndex = cursor.getColumnIndex(column_CustomerPassword)
+            val customerIdColumnIndex = cursor.getColumnIndex(column_CustmerId)
 
-            if (customerIdIndex == -1) {
-                // Handle the case where the column index is not found
-                cursor.close()
-                db.close()
-                null
+            if (passwordColumnIndex != -1 && customerIdColumnIndex != -1) {
+                val storedHashedPassword = cursor.getString(passwordColumnIndex)
+
+                if (BCrypt.checkpw(customer.password, storedHashedPassword)) {
+                    // Passwords match
+                    val customerId = cursor.getInt(customerIdColumnIndex)
+                    cursor.close()
+                    db.close()
+                    return customerId
+                } else {
+                    // Passwords do not match
+                    cursor.close()
+                    db.close()
+                    return -1
+                }
             } else {
-                val customer = CustomerModel(
-                    cursor.getInt(customerIdIndex),
-                    cursor.getString(customerFullNameIndex),
-                    cursor.getString(customerEmailIndex),
-                    cursor.getString(customerPhoneNoIndex),
-                    cursor.getString(customerUserNameIndex),
-                    cursor.getString(customerPasswordIndex),
-                    cursor.getInt(customerIsActiveIndex) == 1
-                )
+                // Password or customer ID column not found
                 cursor.close()
                 db.close()
-                customer
+                return -1
             }
         } else {
+            // User not found
             cursor.close()
             db.close()
-            null // Customer not found
+            return -1
         }
     }
-///////////************************//////////////
+
+
+    ///////////************************//////////////
 
     // Modify the getAllProducts function to handle image data
-    fun getAllProducts(): ArrayList<ProductModel> {
+    override fun getAllProducts(): ArrayList<ProductModel> {
         val db: SQLiteDatabase
         try {
             db = this.readableDatabase
@@ -351,7 +330,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
         return productList
     }
 
-    fun getProductById(productId: Int): ProductModel? {
+    override fun getProductById(productId: Int): ProductModel? {
         val db: SQLiteDatabase
         try {
             db = this.readableDatabase
@@ -369,7 +348,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
             val nameIndex = cursor.getColumnIndex(column_productName)
             val priceIndex = cursor.getColumnIndex(column_productPrice)
             val availableIndex = cursor.getColumnIndex(column_productAvailable)
-             val imageIndex = cursor.getColumnIndex(column_productImage)
+            val imageIndex = cursor.getColumnIndex(column_productImage)
 
             // Check if column indices are valid
             if (idIndex >= 0 && nameIndex >= 0 && priceIndex >= 0 && availableIndex >= 0) {
@@ -377,7 +356,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
                 val name: String = cursor.getString(nameIndex)
                 val price: Float = cursor.getFloat(priceIndex)
                 val available: Boolean = cursor.getInt(availableIndex) == 1
-                 val image: ByteArray? = cursor.getBlob(imageIndex)
+                val image: ByteArray? = cursor.getBlob(imageIndex)
 
                 val product = ProductModel(
                     id,
@@ -401,14 +380,15 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
         }
     }
 
-    fun editProduct(product: ProductModel) {
+    override fun editProduct(product: ProductModel) {
         val db = writableDatabase
         val cv = ContentValues()
 
         // Update the relevant columns with the new values
         cv.put(column_productName, product.name)
         //only showing 2 decimal places
-        cv.put(column_productPrice,product.price.toDouble().toFloat()
+        cv.put(
+            column_productPrice, product.price.toDouble().toFloat()
         )
 
 
@@ -422,7 +402,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
         db.close()
     }
 
-    fun editProductImageById(productId: Int, image: ByteArray) {
+    override fun editProductImageById(productId: Int, image: ByteArray) {
         val db = writableDatabase
         val cv = ContentValues()
 
@@ -439,7 +419,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
 
 
     //////////////////////////////
-    suspend fun addAdminAsync(admin: AdminModel): Int {
+    override suspend fun addAdminAsync(admin: AdminModel): Int {
         return withContext(Dispatchers.IO) {
             val checkAdminUsernameExists = checkAdminUsernameExists(admin)
             if (checkAdminUsernameExists < 0)
@@ -452,7 +432,11 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
             cv.put(column_AdminEmail, admin.email)
             cv.put(column_AdminPhoneNo, admin.phoneNo)
             cv.put(column_AdminUserName, admin.username.lowercase())
-            cv.put(column_AdminPassword, admin.password)
+
+            // Hash the password using bcrypt
+            val hashedPassword = BCrypt.hashpw(admin.password, BCrypt.gensalt())
+            cv.put(column_AdminPassword, hashedPassword)
+
             cv.put(column_AdminIsActive, admin.isActive)
 
             val success = db.insert(adminTableName, null, cv)
@@ -461,11 +445,9 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
 
             if (success.toInt() == -1) success.toInt() else success.toInt()
         }
-
-
     }
 
-    fun checkAdminUsernameExists(admin: AdminModel): Int {
+    override fun checkAdminUsernameExists(admin: AdminModel): Int {
 
         val db: SQLiteDatabase
         try {
@@ -494,8 +476,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
 
     }
 
-    fun getAdmin(admin: AdminModel): Int {
-
+    override fun getAdmin(admin: AdminModel): Int {
         val db: SQLiteDatabase
         try {
             db = this.readableDatabase
@@ -504,27 +485,46 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
         }
 
         val userName = admin.username.lowercase()
-        val userPassword = admin.password
 
         val sqlStatement =
-            "SELECT * FROM $adminTableName WHERE $column_AdminUserName = ? AND $column_AdminPassword = ?"
-        val param = arrayOf(userName, userPassword)
+            "SELECT * FROM $adminTableName WHERE $column_AdminUserName = ?"
+        val param = arrayOf(userName)
         val cursor: Cursor = db.rawQuery(sqlStatement, param)
         if (cursor.moveToFirst()) {
-            // The customer is found
-            val n = cursor.getInt(0)
+            // The admin is found, now check the password
+            val passwordColumnIndex = cursor.getColumnIndex(column_AdminPassword)
+            val adminIdColumnIndex = cursor.getColumnIndex(column_AdminId)
+
+            if (passwordColumnIndex != -1 && adminIdColumnIndex != -1) {
+                val storedHashedPassword = cursor.getString(passwordColumnIndex)
+
+                return if (BCrypt.checkpw(admin.password, storedHashedPassword)) {
+                    // Passwords match
+                    val adminId = cursor.getInt(adminIdColumnIndex)
+                    cursor.close()
+                    db.close()
+                    adminId
+                } else {
+                    // Passwords do not match
+                    cursor.close()
+                    db.close()
+                    -1
+                }
+            } else {
+                // Password or admin ID column not found
+                cursor.close()
+                db.close()
+                return -1
+            }
+        } else {
+            // Admin not found
             cursor.close()
             db.close()
-            return n
+            return -1
         }
-
-        cursor.close()
-        db.close()
-        return -1 //User not found
-
     }
 
-    suspend fun addProductAsync(product: ProductModel) {
+    override suspend fun addProductAsync(product: ProductModel) {
         return withContext(Dispatchers.IO) {
             val db = writableDatabase
             val cv = ContentValues()
@@ -540,7 +540,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
     }
 
     // Order table
-    suspend fun addOrderAsync( order: OrderModel) {
+    override suspend fun addOrderAsync(order: OrderModel): Long {
         return withContext(Dispatchers.IO) {
             val db = writableDatabase
             val cv = ContentValues()
@@ -550,13 +550,16 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
             cv.put(column_OrderOrderStatus, order.orderStatus)
 
             val success = db.insert(orderTableName, null, cv)
-            db.close()
-        }
+            val orderId =
+                if (success != -1L) success else throw SQLiteException("Failed to insert order")
 
+            db.close()
+            orderId
+        }
     }
 
     // Payment table
-    suspend fun addPaymentAsync( paymentModel: PaymentModel) {
+    override suspend fun addPaymentAsync(paymentModel: PaymentModel) {
         return withContext(Dispatchers.IO) {
             val db = writableDatabase
             val cv = ContentValues()
@@ -574,7 +577,7 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
     }
 
     // OrderDetails table
-    suspend fun addOrderDetailsAsync(orderDetailsModel: OrderDetailsModel): Long {
+    override suspend fun addOrderDetailsAsync(orderDetailsModel: OrderDetailsModel): Long {
         return withContext(Dispatchers.IO) {
             val db = writableDatabase
             val cv = ContentValues()
@@ -589,6 +592,155 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DataBaseName,
         }
     }
 
+
+    fun getAllOrdersByCustomerId(customerId: Int): List<OrderModel> {
+        val db: SQLiteDatabase
+        try {
+            db = this.readableDatabase
+        } catch (e: SQLiteException) {
+            // Handle the exception or log an error
+            return emptyList()
+        }
+
+        val orderList = mutableListOf<OrderModel>()
+        val sqlStatement =
+            "SELECT $column_OrderId, $column_OrderCusId, $column_OrderOrderDate, $column_OrderOrderTime, $column_OrderOrderStatus FROM $orderTableName WHERE $column_OrderCusId = ?"
+
+        val param = arrayOf(customerId.toString())
+        val cursor: Cursor = db.rawQuery(sqlStatement, param)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val orderIdIndex = cursor.getColumnIndex(column_OrderId)
+                val customerIdIndex = cursor.getColumnIndex(column_OrderCusId)
+                val orderDateIndex = cursor.getColumnIndex(column_OrderOrderDate)
+                val orderTimeIndex = cursor.getColumnIndex(column_OrderOrderTime)
+                val orderStatusIndex = cursor.getColumnIndex(column_OrderOrderStatus)
+
+                if (orderIdIndex >= 0 && customerIdIndex >= 0 && orderDateIndex >= 0 && orderTimeIndex >= 0 && orderStatusIndex >= 0) {
+                    val orderId: Int = cursor.getInt(orderIdIndex)
+                    val customerId: Int = cursor.getInt(customerIdIndex)
+                    val orderDate: String = cursor.getString(orderDateIndex)
+                    val orderTime: String = cursor.getString(orderTimeIndex)
+                    val orderStatus: String = cursor.getString(orderStatusIndex)
+
+                    val order = OrderModel(
+                        orderId,
+                        customerId,
+                        orderDate,
+                        orderTime,
+                        orderStatus
+                    )
+                    orderList.add(order)
+                } else {
+                }
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+
+        return orderList
+    }
+
+    fun getAllPreparingOrders(): List<OrderModel> {
+        val db: SQLiteDatabase
+        try {
+            db = this.readableDatabase
+        } catch (e: SQLiteException) {
+            // Handle the exception or log an error
+            return emptyList()
+        }
+
+        val preparingOrderList = mutableListOf<OrderModel>()
+        val sqlStatement =
+            "SELECT $column_OrderId, $column_OrderCusId, $column_OrderOrderDate, $column_OrderOrderTime, $column_OrderOrderStatus FROM $orderTableName WHERE $column_OrderOrderStatus = ?"
+
+        val param = arrayOf("Preparing")
+        val cursor: Cursor = db.rawQuery(sqlStatement, param)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val orderIdIndex = cursor.getColumnIndex(column_OrderId)
+                val customerIdIndex = cursor.getColumnIndex(column_OrderCusId)
+                val orderDateIndex = cursor.getColumnIndex(column_OrderOrderDate)
+                val orderTimeIndex = cursor.getColumnIndex(column_OrderOrderTime)
+                val orderStatusIndex = cursor.getColumnIndex(column_OrderOrderStatus)
+
+                if (orderIdIndex >= 0 && customerIdIndex >= 0 && orderDateIndex >= 0 && orderTimeIndex >= 0 && orderStatusIndex >= 0) {
+                    val orderId: Int = cursor.getInt(orderIdIndex)
+                    val customerId: Int = cursor.getInt(customerIdIndex)
+                    val orderDate: String = cursor.getString(orderDateIndex)
+                    val orderTime: String = cursor.getString(orderTimeIndex)
+                    val orderStatus: String = cursor.getString(orderStatusIndex)
+
+                    val order = OrderModel(
+                        orderId,
+                        customerId,
+                        orderDate,
+                        orderTime,
+                        orderStatus
+                    )
+                    preparingOrderList.add(order)
+                } else {
+                    // Handle the case where one or more column indices are not found
+                    // Log an error or take appropriate action
+                }
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+
+        return preparingOrderList
+    }
+
+    fun getProductIdsByOrderId(orderId: Int): List<Int> {
+        val db: SQLiteDatabase
+        try {
+            db = this.readableDatabase
+        } catch (e: SQLiteException) {
+            return emptyList()
+        }
+
+        val productIds = mutableListOf<Int>()
+        val sqlStatement =
+            "SELECT $column_orderDetailsProdId FROM $orderDetailsTableName WHERE $column_orderDetailsOrderId = ?"
+
+        val param = arrayOf(orderId.toString())
+        val cursor: Cursor = db.rawQuery(sqlStatement, param)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val productIdIndex = cursor.getColumnIndex(column_orderDetailsProdId)
+
+                if (productIdIndex >= 0) {
+                    val productId: Int = cursor.getInt(productIdIndex)
+                    productIds.add(productId)
+                } else {
+                }
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+
+        return productIds
+    }
+
+    fun markOrderForCollection(orderId: Int) {
+        val db = writableDatabase
+        val cv = ContentValues()
+
+        cv.put(column_OrderOrderStatus, "Collect")
+
+        val whereClause = "$column_OrderId = ?"
+        val whereArgs = arrayOf(orderId.toString())
+
+        db.update(orderTableName, cv, whereClause, whereArgs)
+
+        db.close()
+    }
 
 }
 
